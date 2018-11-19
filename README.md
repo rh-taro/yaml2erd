@@ -46,7 +46,7 @@ sample path
 ### step4. execute
 ```
 mkdir erd
-bin/yaml2erd erd/table.yaml -c config/gv_conf.yaml -o erd/table.png
+yaml2erd erd/table.yaml -c config/gv_conf.yaml -o erd/table.png
 ```
 
 - `-c` option is config path
