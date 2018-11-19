@@ -21,8 +21,33 @@ Or install it yourself as:
     $ gem install yaml2erd
 
 ## Usage
+### step1. you should install `graphviz` and `fonts`
+ex.
 
-TODO: Write usage instructions here
+```
+apt-get install -y graphviz task-japanese fonts-ipafont fonts-noto-cjk
+```
+
+### step2. create yaml (required)
+examle: https://github.com/rh-taro/dockerized_yaml2erd#sample
+
+sample path
+`erd/table.yaml`
+
+### step3. create conf (not required)
+ex: https://github.com/rh-taro/dockerized_yaml2erd/blob/master/config/gv_conf.yaml
+
+sample path
+`config/gv_conf.yaml`
+
+### step4. execute
+```
+mkdir erd
+bin/yaml2erd erd/table.yaml -c config/gv_conf.yaml -o erd/table.png
+```
+
+- `-c` option is config path
+- `-o` option is outputed path
 
 ## Development
 
