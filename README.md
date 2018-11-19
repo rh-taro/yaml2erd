@@ -22,6 +22,9 @@ Or install it yourself as:
 
 ## Usage
 ### step1. you should install `graphviz` and `fonts`
+
+**recommend using docker**
+
 ex.
 
 ```
