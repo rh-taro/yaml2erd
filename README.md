@@ -52,6 +52,22 @@ yaml2erd erd/table.yaml -c config/gv_conf.yaml -o erd/table.png
 - `-c` option is config path
 - `-o` option is outputed path
 
+## you can notice the difference between ERD and DDL
+- step1. get column info from yaml
+
+```
+parser = ErYamlParser.new('erd/table.yaml')
+columns_hash_yaml = parser.models[:Post].columns
+```
+
+- step2. get column info from ActiveRecord
+
+```
+columns_hash_ar = Post.column_names
+```
+
+- step3. Write test code to compare these two
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
