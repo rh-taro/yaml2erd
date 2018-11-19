@@ -1,5 +1,5 @@
 require 'gviz'
-require 'rails/all'
+require 'active_support/all'
 require 'yaml2erd/version'
 require 'yaml2erd/er_yaml_parser'
 
