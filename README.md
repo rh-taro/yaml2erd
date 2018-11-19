@@ -21,7 +21,10 @@ Or install it yourself as:
     $ gem install yaml2erd
 
 ## Usage
+
 ### step1. you should install `graphviz` and `fonts`
+**〜recommend using docker〜**
+
 ex.
 
 ```
