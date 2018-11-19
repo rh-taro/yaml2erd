@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["rh-taro"]
   spec.email         = [""]
 
-  spec.summary       = %q{ERD}
-  spec.description   = %q{ERD}
+  spec.summary       = %q{ERD create from yaml}
+  spec.description   = %q{assist design and maintenance}
   spec.homepage      = "https://github.com/rh-taro/yaml2erd"
   spec.license       = "MIT"
 
@@ -34,9 +34,8 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency 'rails', '~> 5.2'
+  spec.add_dependency 'activesupport', '~> 5.2'
   spec.add_dependency 'gviz', '~> 0.3.5'
-  spec.add_dependency 'bootsnap', '~> 1.3'
 
   spec.add_development_dependency "bundler", "~> 1.17"
   spec.add_development_dependency "rake", "~> 10.0"

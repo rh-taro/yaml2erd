@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'yaml2erd'
+
+options = {}
+OptionParser.new do |opt|
+  opt.on('-c [VALUE]', 'config path') { |v| options[:c] = v }
+  opt.on('-o [VALUE]', 'output path') { |v| options[:o] = v }
+  opt.parse!(ARGV)
+end
+
+parser = Yaml2erd.new(ARGV[0], options[:c])
+# gvizへ書き出し
+parser.write_erd
+# 保存
+parser.file_save(save_path: options[:o])
