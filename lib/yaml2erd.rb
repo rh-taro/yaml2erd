@@ -7,11 +7,6 @@ require 'yaml2erd/gv_id_map'
 class Yaml2erd
   attr_accessor :group_global_conf
 
-  ARROW_MAP = {
-    has_many: { arrowhead: 'crow', arrowtail: 'tee', arrowsize: 5, dir: 'both', minlen: 5, penwidth: 10 },
-    has_one: { arrowhead: 'tee', arrowtail: 'tee', arrowsize: 5, dir: 'both', minlen: 5, penwidth: 10 }
-  }.freeze
-
   TABLE_HEADER = %w[
     物理名
     論理名
@@ -23,19 +18,30 @@ class Yaml2erd
     説明
   ].freeze
 
-  DEFAULT_CONF = {
+  CUSTOMIZABLE_CONF = {
     global_conf: {
       layout: 'dot'
     },
     entity_conf: {
       shape: 'Mrecord',
       fontname: 'Noto Sans CJK JP Black',
-      fontsize: 50
+      fontsize: 20
     },
     group_conf: {
       shape: 'Mrecord',
       fontname: 'Noto Sans CJK JP Black',
-      fontsize: 120
+      fontsize: 40
+    },
+    arrow_map: {
+      has_many: { arrowsize: 3, minlen: 2, penwidth: 4 },
+      has_one: { arrowsize: 3, minlen: 2, penwidth: 4 }
+    }
+  }.freeze
+
+  NOT_CUSTOMIZABLE_CONF = {
+    arrow_map: {
+      has_many: { arrowhead: 'crow', arrowtail: 'tee', dir: 'both' },
+      has_one: { arrowhead: 'tee', arrowtail: 'tee', dir: 'both' }
     }
   }.freeze
 
@@ -45,7 +51,8 @@ class Yaml2erd
     @gv = Gviz.new
     @gv_id_map = GvIdMap.new
 
-    apply_conf(conf_yaml_path)
+    @customized_conf = fetch_conf(conf_yaml_path)
+    apply_conf(@customized_conf)
   end
 
   def write_erd
@@ -89,26 +96,38 @@ class Yaml2erd
 
   private
 
-  def apply_conf(conf_yaml_path)
-    conf = DEFAULT_CONF
-    custom_conf = {}
+  def fetch_conf(conf_yaml_path)
+    user_conf = {}
     if conf_yaml_path.present?
       File.open(conf_yaml_path) do |file|
-        custom_conf = YAML.safe_load(file.read).deep_symbolize_keys
+        user_conf = YAML.safe_load(file.read).deep_symbolize_keys
       end
     end
 
-    # DEFAULT_CONFとキー重複しているものだけ適用
-    custom_conf.each do |custom_key, custom_details|
-      if conf.keys.include?(custom_key)
-        custom_details.each do |custom_detail_key, custom_val|
-          if conf[custom_key].keys.include?(custom_detail_key)
-            conf[custom_key][custom_detail_key] = custom_val
-          end
-        end
+    # CUSTOMIZABLE_CONFとキー重複しているものだけ適用
+    customized_conf = merge_keep_struct(CUSTOMIZABLE_CONF.dup, user_conf)
+
+    # ユーザ設定取り込んで、固定値をマージして返す
+    customized_conf.deep_merge(NOT_CUSTOMIZABLE_CONF)
+  end
+
+  def merge_keep_struct(base_hash, input_hash)
+    input_hash.each do |key, val|
+      # input_hashのネストが深すぎる時にエラーになるからtry
+      next unless base_hash.try(:keys).try(:include?, key)
+
+      if val.is_a?(Hash)
+        base_hash[key] = merge_keep_struct(base_hash[key], input_hash[key])
+      else
+        # input_hashのネストが浅すぎる時(inputは底までついたけどbaseはまだhashの時)はスルーするように
+        next if base_hash[key].is_a?(Hash)
+        base_hash[key] = val
       end
     end
+    base_hash
+  end
 
+  def apply_conf(conf)
     # 適用
     @group_global_conf = conf[:group_conf]
     @nodes_conf = conf[:entity_conf]
@@ -196,8 +215,8 @@ class Yaml2erd
     return if relations.blank?
     relations.each do |relation|
       relation.each do |rel_type, rel_model|
-        next if rel_type == :belongs_to
-        @gv.edge "#{@gv_id_map.enc(model)}_#{@gv_id_map.enc(rel_model)}", ARROW_MAP[rel_type]
+        next if rel_type != :has_one && rel_type != :has_many
+        @gv.edge "#{@gv_id_map.enc(model)}_#{@gv_id_map.enc(rel_model)}", @customized_conf[:arrow_map][rel_type]
       end
     end
   end
