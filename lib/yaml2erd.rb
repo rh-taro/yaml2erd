@@ -18,37 +18,25 @@ class Yaml2erd
     説明
   ].freeze
 
-  CUSTOMIZABLE_CONF = {
+  DEFAULT_CONF = {
     global_conf: {
-      layout: 'fdp',
+      layout: 'dot',
       splines: 'ortho',
-      K: 5
     },
     entity_conf: {
       shape: 'Mrecord',
       fontname: 'Noto Sans CJK JP Black',
-      fontsize: 20
+      fontsize: 20,
     },
     group_conf: {
       shape: 'Mrecord',
       fontname: 'Noto Sans CJK JP Black',
-      fontsize: 40
+      fontsize: 40,
     },
     arrow_map: {
-      has_many: { arrowsize: 3, penwidth: 4, len: 10 },
-      has_one: { arrowsize: 3, penwidth: 4, len: 10 }
-    }
-  }.freeze
-
-  NOT_CUSTOMIZABLE_CONF = {
-    global_conf: {
-      overlap: false,
-      sep: '+1'
+      has_many: {},
+      has_one: {},
     },
-    arrow_map: {
-      has_many: { arrowhead: 'crow', arrowtail: 'tee', dir: 'both' },
-      has_one: { arrowhead: 'tee', arrowtail: 'tee', dir: 'both' }
-    }
   }.freeze
 
   # TODO: nodesとglobalの違いみたいなの調査
@@ -110,27 +98,8 @@ class Yaml2erd
       end
     end
 
-    # CUSTOMIZABLE_CONFとキー重複しているものだけ適用
-    customized_conf = merge_keep_struct(CUSTOMIZABLE_CONF.dup, user_conf)
-
     # ユーザ設定取り込んで、固定値をマージして返す
-    customized_conf.deep_merge(NOT_CUSTOMIZABLE_CONF)
-  end
-
-  def merge_keep_struct(base_hash, input_hash)
-    input_hash.each do |key, val|
-      # input_hashのネストが深すぎる時にエラーになるからtry
-      next unless base_hash.try(:keys).try(:include?, key)
-
-      if val.is_a?(Hash)
-        base_hash[key] = merge_keep_struct(base_hash[key], input_hash[key])
-      else
-        # input_hashのネストが浅すぎる時(inputは底までついたけどbaseはまだhashの時)はスルーするように
-        next if base_hash[key].is_a?(Hash)
-        base_hash[key] = val
-      end
-    end
-    base_hash
+    DEFAULT_CONF.deep_merge(user_conf)
   end
 
   def apply_conf(conf)
